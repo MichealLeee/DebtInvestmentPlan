@@ -25,18 +25,24 @@
             background-size: 30px 30px;
             color: #1a1a1a;
             box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            transition: all 0.3s ease;
         }
 
         /* 換頁動畫 */
-        .slide-enter { animation: slideIn 0.5s cubic-bezier(0.4, 0, 0.2, 1); }
+        .slide-enter { animation: slideIn 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards; }
         @keyframes slideIn {
-            from { opacity: 0; transform: translateX(20px); }
+            from { opacity: 0; transform: translateX(10px); }
             to { opacity: 1; transform: translateX(0); }
         }
 
         /* 專業標籤與線條 */
         .divider { height: 2px; background: #1a1a1a; margin: 20px 0; }
         .card-outline { border: 1px solid #1a1a1a; background: white; border-radius: 2px; }
+        
+        /* 滾動條美化 */
+        .custom-scroll::-webkit-scrollbar { width: 4px; }
+        .custom-scroll::-webkit-scrollbar-track { background: transparent; }
+        .custom-scroll::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 10px; }
     </style>
 </head>
 <body>
@@ -45,56 +51,58 @@
     <script type="text/babel">
         const { useState, useEffect } = React;
 
-        // 圖示組件：確保 lucide 正確初始化
+        // 圖示組件：優化初始化邏輯
         const Icon = ({ name, size = 24, className = "" }) => {
             useEffect(() => {
-                if (window.lucide) window.lucide.createIcons();
-            });
+                if (window.lucide) {
+                    window.lucide.createIcons();
+                }
+            }, [name]);
             return <i data-lucide={name} style={{ width: size, height: size }} className={className}></i>;
         };
 
         const WealthApp = () => {
             const [slide, setSlide] = useState(0);
-            const total = 6;
 
+            const total = 7;
             const next = () => setSlide(s => Math.min(s + 1, total - 1));
             const prev = () => setSlide(s => Math.max(s - 1, 0));
 
             const slides = [
-                // 第一頁：封面
-                <div className="flex flex-col h-full justify-center p-12 slide-enter">
+                // 第 1 頁：封面
+                <div key="s0" className="flex flex-col h-full justify-center p-8 md:p-16 slide-enter overflow-y-auto custom-scroll">
                     <div className="flex items-center gap-4 mb-8">
                         <div className="w-12 h-1 bg-black"></div>
                         <p className="mono text-sm tracking-[0.3em] font-bold text-gray-500 uppercase">Strategy Architecture 2026</p>
                     </div>
-                    <h1 className="text-5xl md:text-7xl font-bold leading-tight mb-6">資產活化與資金<br/>再配置計畫書</h1>
-                    <p className="text-2xl text-gray-600 mb-12 font-light">從現金流防禦到複利增長的策略轉型</p>
-                    <div className="flex gap-6">
-                        <div className="px-6 py-4 card-outline">
+                    <h1 className="text-4xl md:text-7xl font-bold leading-tight mb-6">資產活化與資金<br/>再配置計畫書</h1>
+                    <p className="text-xl md:text-2xl text-gray-600 mb-12 font-light">從現金流防禦到複利增長的策略轉型</p>
+                    <div className="flex flex-wrap gap-4 md:gap-6">
+                        <div className="px-6 py-4 card-outline flex-1 min-w-[150px]">
                             <p className="mono text-xs text-gray-400 mb-1">TARGET CAGR</p>
                             <p className="text-2xl font-bold">+8.5%</p>
                         </div>
-                        <div className="px-6 py-4 card-outline">
+                        <div className="px-6 py-4 card-outline flex-1 min-w-[150px]">
                             <p className="mono text-xs text-gray-400 mb-1">MONTHLY CAPACITY</p>
-                            <p className="text-2xl font-bold text-indigo-700">$46,433</p>
+                            <p className="text-2xl font-bold text-indigo-700">$46,435</p>
                         </div>
                     </div>
                 </div>,
 
-                // 第二頁：現況與風險
-                <div className="flex flex-col h-full p-12 slide-enter">
-                    <h2 className="text-3xl font-bold mb-4 flex items-center gap-3">
+                // 第 2 頁：現況與風險
+                <div key="s1" className="flex flex-col h-full p-8 md:p-16 slide-enter overflow-y-auto custom-scroll">
+                    <h2 className="text-2xl md:text-3xl font-bold mb-4 flex items-center gap-3">
                         <span className="mono text-red-600">01</span> 現況風險：理財型房貸懸崖
                     </h2>
                     <div className="divider"></div>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-12 mt-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12 mt-4">
                         <div className="space-y-6">
                             <p className="text-lg leading-relaxed text-gray-700">
                                 目前理財型房貸高度依賴銀行續約。若續約失敗被迫轉為 10 年本利攤還，月支出將由 <span className="font-bold underline">31,295</span> 激增至 <span className="font-bold underline text-red-600">50,779</span>。
                             </p>
                             <div className="p-6 bg-red-50 border border-red-200">
                                 <p className="text-sm mono text-red-500 mb-2">EXPECTED DEFICIT / 月</p>
-                                <p className="text-4xl font-bold text-red-600">-$15,291</p>
+                                <p className="text-3xl md:text-4xl font-bold text-red-600">-$15,291</p>
                             </div>
                         </div>
                         <div className="flex flex-col justify-center items-center card-outline p-8 bg-gray-50 border-dashed border-2">
@@ -106,144 +114,216 @@
                     </div>
                 </div>,
 
-                // 第三頁：雙軌優化策略
-                <div className="flex flex-col h-full p-12 slide-enter">
-                    <h2 className="text-3xl font-bold mb-4 flex items-center gap-3">
+                // 第 3 頁：雙軌優化策略
+                <div key="s2" className="flex flex-col h-full p-8 md:p-16 slide-enter overflow-y-auto custom-scroll">
+                    <h2 className="text-2xl md:text-3xl font-bold mb-4 flex items-center gap-3">
                         <span className="mono text-indigo-700">02</span> 雙軌優化：轉貸長限與保單活化
                     </h2>
                     <div className="divider"></div>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mt-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8 mt-4">
                         <div className="card-outline p-6 space-y-4">
                             <div className="flex justify-between items-center">
                                 <h3 className="font-bold text-xl">策略 A：轉貸元大</h3>
-                                <span className="px-2 py-1 bg-indigo-100 text-indigo-700 text-xs mono">28 YEARS</span>
+                                <span className="px-2 py-1 bg-indigo-100 text-indigo-700 text-xs mono uppercase">28 Years</span>
                             </div>
                             <ul className="space-y-2 mono text-sm text-gray-600">
-                                <li className="flex justify-between"><span>額度</span><span className="font-bold">900 萬</span></li>
-                                <li className="flex justify-between"><span>利率</span><span className="font-bold">2.45%</span></li>
-                                <li className="flex justify-between text-black"><span>淨盈餘</span><span className="font-bold">+14,995</span></li>
+                                <li className="flex justify-between border-b border-gray-100 pb-1"><span>額度</span><span className="font-bold text-black">900 萬</span></li>
+                                <li className="flex justify-between border-b border-gray-100 pb-1"><span>利率</span><span className="font-bold text-black">2.45%</span></li>
+                                <li className="flex justify-between text-black"><span>淨盈餘</span><span className="font-bold text-indigo-600">+$14,995</span></li>
                             </ul>
                         </div>
                         <div className="card-outline p-6 space-y-4">
                             <div className="flex justify-between items-center">
                                 <h3 className="font-bold text-xl">策略 B：保單套利</h3>
-                                <span className="px-2 py-1 bg-green-100 text-green-700 text-xs mono">ARBITRAGE</span>
+                                <span className="px-2 py-1 bg-green-100 text-green-700 text-xs mono uppercase">Arbitrage</span>
                             </div>
                             <ul className="space-y-2 mono text-sm text-gray-600">
-                                <li className="flex justify-between"><span>借款額度</span><span className="font-bold">450 萬</span></li>
-                                <li className="flex justify-between"><span>假設殖利率</span><span className="font-bold">7.0%</span></li>
-                                <li className="flex justify-between text-black"><span>純收益</span><span className="font-bold text-green-600">+11,438</span></li>
+                                <li className="flex justify-between border-b border-gray-100 pb-1"><span>借款額度</span><span className="font-bold text-black">450 萬</span></li>
+                                <li className="flex justify-between border-b border-gray-100 pb-1"><span>假設收益</span><span className="font-bold text-black">7.0%</span></li>
+                                <li className="flex justify-between text-black"><span>純收益</span><span className="font-bold text-green-600">+$11,438</span></li>
                             </ul>
                         </div>
                     </div>
-                    <div className="mt-8 p-4 bg-black text-white text-center mono tracking-widest text-sm">
+                    <div className="mt-8 p-4 bg-black text-white text-center mono tracking-widest text-xs md:text-sm">
                         TOTAL REALLOCATION CAPACITY: $26,433 / MONTH
                     </div>
                 </div>,
 
-                // 第四頁：自動化獲利流水線
-                <div className="flex flex-col h-full p-12 slide-enter">
-                    <h2 className="text-3xl font-bold mb-12 text-center">自動化投資流水線 (Pipeline)</h2>
-                    <div className="flex flex-col md:flex-row gap-8 items-center justify-center">
-                        <div className="text-center px-8 border-r border-black/10">
-                            <p className="mono text-xs text-gray-400 mb-2">SURPLUS</p>
+                // 第 4 頁：自動化獲利流水線
+                <div key="s3" className="flex flex-col h-full p-8 md:p-16 slide-enter overflow-y-auto custom-scroll">
+                    <h2 className="text-2xl md:text-3xl font-bold mb-12 text-center">自動化投資流水線 (Pipeline)</h2>
+                    <div className="flex flex-col md:flex-row gap-6 md:gap-8 items-center justify-center">
+                        <div className="text-center px-8 border-b md:border-b-0 md:border-r border-black/10 pb-4 md:pb-0">
+                            <p className="mono text-xs text-gray-400 mb-2 uppercase">Surplus</p>
                             <p className="text-3xl font-bold text-indigo-700">$26,433</p>
                         </div>
-                        <div className="text-4xl text-gray-300 font-light">+</div>
-                        <div className="text-center px-8 border-r border-black/10">
-                            <p className="mono text-xs text-gray-400 mb-2">PERSONAL SAVINGS</p>
+                        <div className="text-2xl text-gray-300 font-light">+</div>
+                        <div className="text-center px-8 border-b md:border-b-0 md:border-r border-black/10 pb-4 md:pb-0">
+                            <p className="mono text-xs text-gray-400 mb-2 uppercase">Personal Savings</p>
                             <p className="text-3xl font-bold text-gray-700">$20,000</p>
                         </div>
-                        <div className="text-4xl text-gray-300 font-light">=</div>
+                        <div className="text-2xl text-gray-300 font-light">=</div>
                         <div className="bg-indigo-700 text-white p-6 card-outline border-none shadow-xl">
-                            <p className="mono text-xs opacity-70 mb-2">MONTHLY AUTO-INVEST</p>
-                            <p className="text-5xl font-black">$46,433</p>
+                            <p className="mono text-xs opacity-70 mb-2 uppercase text-center">Monthly Auto-Invest</p>
+                            <p className="text-4xl md:text-5xl font-black">$46,435</p>
                         </div>
                     </div>
-                    <div className="mt-12 grid grid-cols-2 gap-8 max-w-2xl mx-auto">
+                    <div className="mt-12 text-center">
+                         <p className="text-slate-500 mono text-sm uppercase tracking-widest">核心配置比例</p>
+                    </div>
+                    <div className="mt-4 grid grid-cols-2 gap-6 md:gap-8 max-w-2xl mx-auto">
                         <div className="text-center">
-                            <p className="font-bold">安聯台灣科技 (70%)</p>
+                            <p className="font-bold text-sm">安聯台灣科技 (70%)</p>
+                            <p className="mono text-indigo-700 font-bold">$32,505</p>
                             <div className="w-full bg-indigo-200 h-2 mt-2"></div>
                         </div>
                         <div className="text-center">
-                            <p className="font-bold">貝萊德世界科技 (30%)</p>
+                            <p className="font-bold text-sm">貝萊德世界科技 (30%)</p>
+                            <p className="mono text-slate-700 font-bold">$13,930</p>
                             <div className="w-full bg-gray-300 h-2 mt-2"></div>
                         </div>
                     </div>
                 </div>,
 
-                // 第五頁：複利未來
-                <div className="flex flex-col h-full p-12 slide-enter">
-                    <h2 className="text-3xl font-bold mb-4 flex items-center gap-3">
-                        <span className="mono text-amber-600">03</span> 複利藍圖：十年累積資產
+                // 第 5 頁：歷史績效與資產回測 (新加入)
+                <div key="s4" className="flex flex-col h-full p-8 md:p-12 slide-enter overflow-y-auto custom-scroll">
+                    <h2 className="text-2xl md:text-3xl font-bold mb-4 flex items-center gap-3">
+                        <span className="mono text-indigo-700">03</span> 歷史績效驗證：數據驅動策略
                     </h2>
                     <div className="divider"></div>
-                    <div className="flex-1 relative flex items-end pb-12">
-                        {/* 模擬成長圖形 */}
-                        <div className="w-full h-64 border-b border-l border-black/20 relative">
-                            <div className="absolute left-1/4 bottom-0 w-1/4 h-1/4 bg-indigo-100 border-t border-indigo-300 flex flex-col justify-center items-center">
-                                <span className="mono text-xs">YEAR 5</span>
-                                <span className="font-bold text-indigo-700">672 萬</span>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-2">
+                        {/* 安聯 */}
+                        <div className="card-outline p-5 bg-white shadow-sm border-l-4 border-l-indigo-600">
+                            <h3 className="font-bold text-lg mb-3 flex items-center justify-between">
+                                <span>安聯台灣科技</span>
+                                <span className="mono text-xs bg-indigo-50 text-indigo-600 px-2 py-1">重量級配置 70%</span>
+                            </h3>
+                            <div className="space-y-4">
+                                <div className="flex justify-between items-end border-b border-slate-100 pb-2">
+                                    <div className="text-sm text-slate-500">5 年定期定額</div>
+                                    <div className="text-right">
+                                        <div className="text-indigo-600 font-bold mono text-lg">+177.89%</div>
+                                        <div className="text-xs text-slate-400">累積淨值: <span className="mono font-bold text-slate-700">$4,519,786</span></div>
+                                    </div>
+                                </div>
+                                <div className="flex justify-between items-end">
+                                    <div className="text-sm text-slate-500">10 年定期定額</div>
+                                    <div className="text-right">
+                                        <div className="text-indigo-600 font-bold mono text-lg">+543.69%</div>
+                                        <div className="text-xs text-slate-400">累積淨值: <span className="mono font-bold text-slate-700">$25,107,116</span></div>
+                                    </div>
+                                </div>
                             </div>
-                            <div className="absolute left-1/2 bottom-0 w-1/2 h-full bg-indigo-600 text-white flex flex-col justify-center items-center">
-                                <span className="mono text-xs opacity-70">YEAR 10</span>
-                                <span className="text-4xl font-black underline underline-offset-8">2,962 萬</span>
+                        </div>
+
+                        {/* 貝萊德 */}
+                        <div className="card-outline p-5 bg-white shadow-sm border-l-4 border-l-slate-400">
+                            <h3 className="font-bold text-lg mb-3 flex items-center justify-between">
+                                <span>貝萊德世界科技 (美元)</span>
+                                <span className="mono text-xs bg-slate-50 text-slate-600 px-2 py-1">全球化配置 30%</span>
+                            </h3>
+                            <div className="space-y-4">
+                                <div className="flex justify-between items-end border-b border-slate-100 pb-2">
+                                    <div className="text-sm text-slate-500">5 年定期定額</div>
+                                    <div className="text-right">
+                                        <div className="text-slate-600 font-bold mono text-lg">+55.89%</div>
+                                        <div className="text-xs text-slate-400">累積淨值: <span className="mono font-bold text-slate-700">$1,302,961</span></div>
+                                    </div>
+                                </div>
+                                <div className="flex justify-between items-end">
+                                    <div className="text-sm text-slate-500">10 年定期定額</div>
+                                    <div className="text-right">
+                                        <div className="text-slate-600 font-bold mono text-lg">+170.38%</div>
+                                        <div className="text-xs text-slate-400">累積淨值: <span className="mono font-bold text-slate-700">$5,419,547</span></div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
-                    <p className="text-center text-gray-500 italic mt-4 font-light leading-relaxed">
-                        "房貸負責持有資產，投資負責累積財富。第 10 年時資產將進入爆發成長期。"
+
+                    <div className="mt-6 p-4 bg-indigo-50 border border-indigo-100 rounded text-center">
+                        <p className="text-sm text-indigo-900 font-medium">
+                            <Icon name="trending-up" size={16} className="inline mr-2 align-text-bottom" />
+                            投組總投入 46,435/月：利用台股高爆發力與全球科技股穩健性，達成 10 年資產翻倍目標。
+                        </p>
+                    </div>
+                </div>,
+
+                // 第 6 頁：複利未來
+                <div key="s5" className="flex flex-col h-full p-8 md:p-16 slide-enter overflow-y-auto custom-scroll">
+                    <h2 className="text-2xl md:text-3xl font-bold mb-4 flex items-center gap-3">
+                        <span className="mono text-amber-600">04</span> 複利藍圖：資產累積路徑
+                    </h2>
+                    <div className="divider"></div>
+                    <div className="flex-1 relative flex items-end pb-12 min-h-[250px]">
+                        {/* 模擬成長圖形 */}
+                        <div className="w-full h-full border-b border-l border-black/20 relative">
+                            <div className="absolute left-[15%] bottom-0 w-[25%] h-[25%] bg-indigo-100 border-t border-indigo-300 flex flex-col justify-center items-center">
+                                <span className="mono text-[10px] md:text-xs">YEAR 5</span>
+                                <span className="font-bold text-indigo-700 text-sm md:text-base">~ 672 萬</span>
+                            </div>
+                            <div className="absolute left-[45%] bottom-0 w-[50%] h-full bg-indigo-600 text-white flex flex-col justify-center items-center">
+                                <span className="mono text-[10px] md:text-xs opacity-70">YEAR 10</span>
+                                <span className="text-3xl md:text-4xl font-black underline underline-offset-8">2,962 萬</span>
+                            </div>
+                        </div>
+                    </div>
+                    <p className="text-center text-gray-500 italic mt-4 font-light leading-relaxed text-sm md:text-base">
+                        "房貸負責持有資產，投資負責累積財富。根據回測數據，第 10 年資產將具備極強的房貸覆蓋能力。"
                     </p>
                 </div>,
 
-                // 第六頁：行動指南
-                <div className="flex flex-col h-full bg-black text-white p-12 slide-enter justify-center items-center text-center">
-                    <h2 className="text-5xl font-bold mb-12">立即啟動資產引擎</h2>
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-8 w-full max-w-4xl">
-                        <div className="p-6 border border-white/20">
-                            <p className="mono text-amber-500 mb-4">STEP 01</p>
+                // 第 7 頁：行動指南
+                <div key="s6" className="flex flex-col h-full bg-black text-white p-8 md:p-16 slide-enter justify-center items-center text-center overflow-y-auto custom-scroll">
+                    <h2 className="text-4xl md:text-5xl font-bold mb-12">立即啟動資產引擎</h2>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8 w-full max-w-4xl">
+                        <div className="p-6 border border-white/20 hover:border-white/40 transition-colors">
+                            <p className="mono text-amber-500 mb-4 uppercase text-xs">Step 01</p>
                             <h3 className="font-bold mb-2 text-xl">轉貸元大</h3>
-                            <p className="text-sm text-gray-400">鎖定 900萬 @ 2.45% / 28年</p>
+                            <p className="text-xs text-gray-400">鎖定 900萬 @ 2.45% / 28年</p>
                         </div>
-                        <div className="p-6 border border-white/20">
-                            <p className="mono text-amber-500 mb-4">STEP 02</p>
+                        <div className="p-6 border border-white/20 hover:border-white/40 transition-colors">
+                            <p className="mono text-amber-500 mb-4 uppercase text-xs">Step 02</p>
                             <h3 className="font-bold mb-2 text-xl">保單活化</h3>
-                            <p className="text-sm text-gray-400">啟動 450 萬保借套利空間</p>
+                            <p className="text-xs text-gray-400">啟動 450 萬保借套利空間</p>
                         </div>
-                        <div className="p-6 border border-white/20">
-                            <p className="mono text-amber-500 mb-4">STEP 03</p>
+                        <div className="p-6 border border-white/20 hover:border-white/40 transition-colors">
+                            <p className="mono text-amber-500 mb-4 uppercase text-xs">Step 03</p>
                             <h3 className="font-bold mb-2 text-xl">自動化 AIP</h3>
-                            <p className="text-sm text-gray-400">執行每月 4.6 萬科技基金組合</p>
+                            <p className="text-xs text-gray-400">執行每月 46,435 定期定額計畫</p>
                         </div>
                     </div>
                     <div className="mt-16">
-                        <p className="mono tracking-[0.5em] text-xs text-gray-500 mb-2">REPORT PREPARED BY</p>
-                        <p className="text-2xl font-bold text-white">李浚瑋 專屬財務規劃報告</p>
+                        <p className="mono tracking-[0.5em] text-[10px] text-gray-500 mb-2 uppercase">Report Prepared By</p>
+                        <p className="text-xl md:text-2xl font-bold text-white tracking-wider">李浚瑋 專屬財務規劃報告</p>
                     </div>
                 </div>
             ];
 
             return (
                 <div className="flex flex-col h-screen w-full items-center justify-center p-0 md:p-8">
-                    <div className="slide-frame w-full h-full md:max-w-6xl md:max-h-[720px] relative overflow-hidden md:rounded-lg">
+                    <div className="slide-frame w-full h-full md:max-w-5xl md:max-h-[720px] relative overflow-hidden md:rounded-lg">
                         {slides[slide]}
 
                         {/* 控制面板 */}
-                        <div className="absolute bottom-0 left-0 right-0 p-8 flex justify-between items-center pointer-events-none">
+                        <div className="absolute bottom-0 left-0 right-0 p-4 md:p-8 flex justify-between items-center pointer-events-none">
                             <button 
                                 onClick={prev}
-                                className={`pointer-events-auto p-4 bg-white/80 backdrop-blur border border-black/10 rounded-full hover:bg-white transition-all ${slide === 0 ? 'opacity-0' : 'opacity-100'}`}
+                                className={`pointer-events-auto p-4 bg-white/80 backdrop-blur border border-black/10 rounded-full hover:bg-white transition-all shadow-md active:scale-95 ${slide === 0 ? 'opacity-0 cursor-default' : 'opacity-100'}`}
+                                disabled={slide === 0}
                             >
                                 <Icon name="chevron-left" />
                             </button>
 
-                            <div className="pointer-events-auto bg-black/5 backdrop-blur px-6 py-2 rounded-full mono text-sm font-bold border border-black/5">
+                            <div className="pointer-events-auto bg-black/5 backdrop-blur px-6 py-2 rounded-full mono text-xs font-bold border border-black/5">
                                 {slide + 1} / {total}
                             </div>
 
                             <button 
                                 onClick={next}
-                                className={`pointer-events-auto p-4 bg-indigo-600 text-white rounded-full shadow-lg hover:bg-indigo-500 transition-all ${slide === total - 1 ? 'opacity-0' : 'opacity-100'}`}
+                                className={`pointer-events-auto p-4 bg-indigo-600 text-white rounded-full shadow-lg hover:bg-indigo-500 transition-all active:scale-95 ${slide === total - 1 ? 'opacity-0 cursor-default' : 'opacity-100'}`}
+                                disabled={slide === total - 1}
                             >
                                 <Icon name="chevron-right" />
                             </button>
