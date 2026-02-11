@@ -4,65 +4,70 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>資產活化計畫書 - 賴育正</title>
+    <!-- 引入 Tailwind CSS 與 Google 字體 -->
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700&family=Roboto+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <!-- 引入 React, Babel 與 Lucide 圖示 -->
     <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
     <style>
+        /* 核心設計規範：NotebookLM 紙本專業風格 */
         body { background-color: #d1d5db; margin: 0; font-family: 'Noto Sans TC', sans-serif; overflow: hidden; }
         .mono { font-family: 'Roboto Mono', monospace; }
-        .slide-frame { background-color: #f9f7f2; background-image: radial-gradient(#d1d5db 0.5px, transparent 0.5px); background-size: 30px 30px; color: #1a1a1a; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); transition: all 0.3s ease; }
+        
+        /* 簡報容器：米色背景 + 細微網格 */
+        .slide-frame {
+            background-color: #f9f7f2;
+            background-image: radial-gradient(#d1d5db 0.5px, transparent 0.5px);
+            background-size: 30px 30px;
+            color: #1a1a1a;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            transition: all 0.3s ease;
+        }
+
+        /* 換頁動畫 */
         .slide-enter { animation: slideIn 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards; }
-        @keyframes slideIn { from { opacity: 0; transform: translateX(10px); } to { opacity: 1; transform: translateX(0); } }
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(10px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        /* 專業標籤與線條 */
         .divider { height: 2px; background: #1a1a1a; margin: 15px 0; }
         .card-outline { border: 1px solid #1a1a1a; background: white; border-radius: 2px; }
+        
+        /* 滾動條美化 */
         .custom-scroll::-webkit-scrollbar { width: 4px; }
+        .custom-scroll::-webkit-scrollbar-track { background: transparent; }
         .custom-scroll::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 10px; }
-        canvas { max-height: 280px !important; } /* 限制圖表高度以適應簡報頁面 */
+
+        /* 圖表動畫 */
+        .path-draw { stroke-dasharray: 1000; stroke-dashoffset: 1000; animation: draw 2s ease-out forwards; }
+        @keyframes draw { to { stroke-dashoffset: 0; } }
     </style>
 </head>
 <body>
     <div id="root"></div>
+
     <script type="text/babel">
-        const { useState, useEffect, useRef } = React;
+        const { useState, useEffect } = React;
+
         const Icon = ({ name, size = 24, className = "" }) => {
-            useEffect(() => { if (window.lucide) window.lucide.createIcons(); }, [name]);
-            return <i data-lucide={name} style={{ width: size, height: size }} className={className}></i>;
-        };
-
-        // 獨立的圖表組件，確保切換到該頁時才渲染
-        const WealthChart = () => {
-            const chartRef = useRef(null);
             useEffect(() => {
-                const ctx = chartRef.current.getContext('2d');
-                const years = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
-                const mortgage = [9000000, 8773463, 8541311, 8303410, 8059614, 7809778, 7553751, 7291382, 7022511, 6746978, 6464619];
-                const invNormal = [1000000, 1850000, 2850000, 4000000, 5250000, 6722508, 9800000, 13800000, 18500000, 24000000, 29626901];
-                const invCrash = invNormal.map(v => Math.round(v * 0.7));
-
-                const chart = new Chart(ctx, {
-                    type: 'line',
-                    data: {
-                        labels: years.map(y => `Y${y}`),
-                        datasets: [
-                            { label: '基金價值', data: invNormal, borderColor: '#4338ca', backgroundColor: 'rgba(67, 56, 202, 0.1)', fill: true, tension: 0.4, borderWidth: 3 },
-                            { label: '-30% 大跌', data: invCrash, borderColor: '#94a3b8', borderDash: [5, 5], tension: 0.4, pointRadius: 0 },
-                            { label: '房貸餘額', data: mortgage, borderColor: '#dc2626', borderWidth: 2, tension: 0 }
-                        ]
-                    },
-                    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { ticks: { font: { size: 10 } } } } }
-                });
-                return () => chart.destroy();
-            }, []);
-            return <canvas ref={chartRef}></canvas>;
+                if (window.lucide) {
+                    window.lucide.createIcons();
+                }
+            }, [name]);
+            return <i data-lucide={name} style={{ width: size, height: size }} className={className}></i>;
         };
 
         const WealthApp = () => {
             const [slide, setSlide] = useState(0);
-            const total = 9;
+
+            const total = 10;
             const next = () => setSlide(s => Math.min(s + 1, total - 1));
             const prev = () => setSlide(s => Math.max(s - 1, 0));
 
@@ -71,10 +76,10 @@
                 <div key="s0" className="flex flex-col h-full justify-center p-12 slide-enter">
                     <div className="flex items-center gap-4 mb-8"><div className="w-12 h-1 bg-black"></div><p className="mono text-sm tracking-widest font-bold text-gray-500 uppercase">Strategy Architecture</p></div>
                     <h1 className="text-5xl md:text-7xl font-bold leading-tight mb-6">資產活化<br/>與資金再配置計畫書</h1>
-                    <p className="text-xl md:text-2xl text-gray-600 mb-12 font-light">客戶：賴育正 先生 </p>
+                    <p className="text-xl md:text-2xl text-gray-600 mb-12 font-light">客戶：賴育正 先生 | 現金流差額複利增長策略</p>
                     <div className="flex flex-wrap gap-6">
                         <div className="px-6 py-4 card-outline flex-1"><p className="mono text-xs text-gray-400 mb-1">每月差額投資</p><p className="text-2xl font-bold">$46,435 TWD</p></div>
-                        <div className="px-6 py-4 card-outline flex-1"><p className="mono text-xs text-gray-400 mb-1">10年期望結果</p><p className="text-2xl font-bold text-indigo-700">$29,626,901 TWD </p></div>
+                        <div className="px-6 py-4 card-outline flex-1"><p className="mono text-xs text-gray-400 mb-1">10年期望結果</p><p className="text-2xl font-bold text-indigo-700">$29,626,901 TWD</p></div>
                     </div>
                 </div>,
 
@@ -84,7 +89,7 @@
                     <div className="divider"></div>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-12 mt-4">
                         <div className="space-y-6">
-                            <p className="text-lg leading-relaxed text-gray-700">目前月支出仰賴理財型房貸維持低利。若續約失敗，月支出將飆升，現金流將立即枯竭。</p>
+                            <p className="text-lg leading-relaxed text-gray-700">目前月支出仰賴理財型房貸維持低利。若續約失敗，月支出將從 <span className="font-bold underline">31,558</span> 飆升至 <span className="font-bold underline text-red-600">59,829</span>，現金流將立即枯竭。</p>
                             <div className="p-6 bg-red-50 border border-red-200">
                                 <p className="text-sm mono text-red-500 mb-2">現金流變動</p>
                                 <p className="text-3xl font-bold text-red-600">+$15,109 ⮕ -$15,291</p>
@@ -97,47 +102,86 @@
                     </div>
                 </div>,
 
-                // 3. 轉貸說明 (略, 保持您原代碼)
+                // 3. 轉貸說明
                 <div key="s2" className="flex flex-col h-full p-12 slide-enter overflow-y-auto custom-scroll">
                     <h2 className="text-3xl font-bold mb-4 flex items-center gap-3"><span className="mono text-indigo-700">02</span> 轉貸說明：確定年限優勢</h2>
                     <div className="divider"></div>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mt-4">
                         <div className="card-outline p-6 space-y-4">
                             <h3 className="font-bold text-xl border-l-4 border-red-500 pl-3">富邦一般型20年+理財型</h3>
-                            <p className="mono text-xs text-gray-600">目前盈餘: +14,944 | 續約失敗: -12,970</p>
+                            <div className="space-y-3 mono text-xs text-gray-600">
+                                <p>A 一般型: 400萬 (2.6%) / 每月 -21,391</p>
+                                <p>B 理財型: 400萬 (3.05%) / 5年一約</p>
+                                <div className="p-2 bg-gray-100">
+                                    <p>目前利息支出: -10,040</p>
+                                    <p className="text-red-600">轉10年攤還本利: -38,233</p>
+                                </div>
+                                <div className="p-2 border-t border-black bg-slate-50 text-sm">
+                                    <p>目前盈餘: <span className="text-green-600 font-bold">+14,944</span></p>
+                                    <p>續約失敗: <span className="text-red-600 font-bold">-12,970</span></p>
+                                </div>
+                            </div>
                         </div>
                         <div className="card-outline p-6 space-y-4 border-indigo-700 bg-indigo-50/30">
                             <h3 className="font-bold text-xl border-l-4 border-indigo-700 pl-3">元大一般型28年</h3>
-                            <p className="mono text-xs text-gray-600">一般型: 900萬 (2.45%)  | 穩定盈餘: +14,977</p>
+                            <div className="space-y-3 mono text-xs text-gray-600">
+                                <p>一般型: 900萬 (2.45%) / 28年攤還</p>
+                                <p className="text-indigo-700 font-bold">每月固定本利支出: -37,503</p>
+                                <div className="mt-12 p-2 border-t border-indigo-700 bg-indigo-700 text-white text-sm">
+                                    <p>每月預期配息: +52,500</p>
+                                    <p className="font-bold text-lg">穩定盈餘: +14,977</p>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>,
 
-                // 4. 雙軌優化 (略, 保持您原代碼)
+                // 4. 雙軌優化策略
                 <div key="s3" className="flex flex-col h-full p-12 slide-enter overflow-y-auto custom-scroll">
-                    <h2 className="text-3xl font-bold mb-4 flex items-center gap-3"><span className="mono text-indigo-700">03</span> 雙軌優化：轉貸與保單活化</h2>
+                    <h2 className="text-3xl font-bold mb-4 flex items-center gap-3"><span className="mono text-indigo-700">03</span> 雙軌優化：轉貸長限與保單活化</h2>
                     <div className="divider"></div>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mt-4">
-                        <div className="card-outline p-6"><h3 className="font-bold text-xl">策略 A：轉貸元大</h3><p className="mono text-sm">淨盈餘: +14,995</p></div>
-                        <div className="card-outline p-6"><h3 className="font-bold text-xl">策略 B：保單套利</h3><p className="mono text-sm">純收益: +11,438</p></div>
+                        <div className="card-outline p-6 space-y-4"><h3 className="font-bold text-xl">策略 A：轉貸元大</h3><ul className="mono text-sm space-y-2"><li>額度: 900 萬</li><li>利率: 2.45%</li><li className="text-indigo-600 font-bold">淨盈餘: +14,995</li></ul></div>
+                        <div className="card-outline p-6 space-y-4"><h3 className="font-bold text-xl">策略 B：保單套利</h3><ul className="mono text-sm space-y-2"><li>借款: 450 萬</li><li>收益: 7.0%</li><li className="text-green-600 font-bold">純收益: +11,438</li></ul></div>
                     </div>
+                    <div className="mt-8 p-4 bg-black text-white text-center mono tracking-widest text-sm">TOTAL CAPACITY: $26,433 / MONTH</div>
                 </div>,
 
-                // 5. 投資流水線 (略, 保持您原代碼)
+                // 5. 投資流水線
                 <div key="s4" className="flex flex-col h-full p-12 slide-enter overflow-y-auto custom-scroll">
                     <h2 className="text-3xl font-bold mb-12 text-center">自動化投資流水線</h2>
                     <div className="flex gap-8 items-center justify-center">
+                        <div className="text-center"><p className="mono text-xs text-gray-400">SURPLUS</p><p className="text-3xl font-bold text-indigo-700">$26,433</p></div>
+                        <div className="text-2xl text-gray-300">+</div>
+                        <div className="text-center"><p className="mono text-xs text-gray-400">PERSONAL SAVINGS</p><p className="text-3xl font-bold text-gray-700">$20,000</p></div>
+                        <div className="text-2xl text-gray-300">=</div>
                         <div className="bg-indigo-700 text-white p-6 card-outline border-none"><p className="mono text-xs opacity-70">AUTO-INVEST</p><p className="text-5xl font-black">$46,435</p></div>
+                    </div>
+                    <div className="mt-12 grid grid-cols-2 gap-8 max-w-2xl mx-auto">
+                        <div className="text-center p-4 border border-black/10"><p className="font-bold">安聯台灣科技 (70%)</p><p className="mono text-indigo-700 font-bold">$32,505</p></div>
+                        <div className="text-center p-4 border border-black/10"><p className="font-bold">貝萊德世界科技 (30%)</p><p className="mono text-slate-700 font-bold">$13,930</p></div>
                     </div>
                 </div>,
 
-                // 6. 歷史績效 (略, 保持您原代碼)
+                // 6. 歷史績效
                 <div key="s5" className="flex flex-col h-full p-12 slide-enter overflow-y-auto custom-scroll">
                     <h2 className="text-3xl font-bold mb-4 flex items-center gap-3"><span className="mono text-indigo-700">04</span> 歷史績效驗證</h2>
                     <div className="divider"></div>
                     <div className="grid grid-cols-2 gap-6 mt-4">
-                        <div className="card-outline p-5"><h3 className="font-bold mb-2">安聯台灣科技</h3><p className="mono text-sm">10 年: $25,107,116 </p></div>
-                        <div className="card-outline p-5"><h3 className="font-bold mb-2">貝萊德世界科技</h3><p className="mono text-sm">10 年: $5,419,547 </p></div>
+                        <div className="card-outline p-5 border-l-4 border-indigo-600 bg-white shadow-sm">
+                            <h3 className="font-bold mb-4 underline">安聯台灣科技</h3>
+                            <div className="mono space-y-4 text-sm">
+                                <div><p className="text-indigo-600 font-bold">5 年: +177.89%</p><p>累積: $4,519,786</p></div>
+                                <div><p className="text-indigo-600 font-bold">10 年: +543.69%</p><p>累積: $25,107,116</p></div>
+                            </div>
+                        </div>
+                        <div className="card-outline p-5 border-l-4 border-slate-400 bg-white shadow-sm">
+                            <h3 className="font-bold mb-4 underline">貝萊德世界科技</h3>
+                            <div className="mono space-y-4 text-sm">
+                                <div><p className="text-slate-600 font-bold">5 年: +55.89%</p><p>累積: $1,302,961</p></div>
+                                <div><p className="text-slate-600 font-bold">10 年: +170.38%</p><p>累積: $5,419,547</p></div>
+                            </div>
+                        </div>
                     </div>
                 </div>,
 
@@ -146,51 +190,117 @@
                     <h2 className="text-3xl font-bold mb-4 flex items-center gap-3"><span className="mono text-amber-600">05</span> 複利藍圖：資產累積路徑</h2>
                     <div className="divider"></div>
                     <div className="flex-1 relative flex items-end pb-12">
-                         <div className="w-full h-4/5 bg-gray-50 card-outline p-4">
-                            <WealthChart />
-                            <p className="text-center mt-2 text-xs text-gray-400">藍色：基金增長 | 紅色：房貸遞減</p>
-                         </div>
+                        <div className="w-full h-full border-b border-l border-black/20 relative">
+                            <div className="absolute left-[15%] bottom-0 w-[25%] h-[25%] bg-indigo-100 border-t border-indigo-300 flex flex-col justify-center items-center"><span className="mono text-xs">YEAR 5</span><span className="font-bold text-indigo-700">$6,722,508</span></div>
+                            <div className="absolute left-[45%] bottom-0 w-[50%] h-full bg-indigo-600 text-white flex flex-col justify-center items-center"><span className="mono text-xs opacity-70">YEAR 10</span><span className="text-4xl font-black">$29,626,901</span></div>
+                        </div>
                     </div>
                 </div>,
 
-                // 8. 債務遞減與資產壓力測試 (合併您的文字與我的圖表)
-                <div key="s7" className="flex flex-col h-full p-12 slide-enter overflow-y-auto custom-scroll">
-                    <h2 className="text-3xl font-bold mb-4 flex items-center gap-3"><span className="mono text-green-700">06</span> 債務遞減與資產壓力測試</h2>
+                // 8. 交叉曲線圖 (新加入視覺化)
+                <div key="s7" className="flex flex-col h-full p-8 md:p-12 slide-enter overflow-y-auto custom-scroll">
+                    <h2 className="text-2xl md:text-3xl font-bold mb-4 text-center">資產增長與房貸交叉曲線圖</h2>
+                    <div className="flex-1 bg-white border border-gray-200 rounded-lg p-6 relative shadow-inner">
+                        {/* 圖例 */}
+                        <div className="absolute top-4 right-4 flex gap-4 text-[10px] mono">
+                            <div className="flex items-center gap-1"><div className="w-3 h-1 bg-green-500"></div> 基金(正常)</div>
+                            <div className="flex items-center gap-1"><div className="w-3 h-1 border-t border-dashed border-gray-400"></div> 基金(-30%壓力)</div>
+                            <div className="flex items-center gap-1"><div className="w-3 h-1 bg-red-400"></div> 房貸餘額</div>
+                        </div>
+
+                        <svg viewBox="0 0 1000 400" className="w-full h-full overflow-visible">
+                            {/* 網格線 */}
+                            {[0, 100, 200, 300, 400].map(y => (
+                                <line key={y} x1="0" y1={y} x2="1000" y2={y} stroke="#f1f5f9" strokeWidth="1" />
+                            ))}
+                            
+                            {/* X 軸標籤 */}
+                            <text x="0" y="420" fontSize="10" fill="#94a3b8">第 0 年</text>
+                            <text x="180" y="420" fontSize="10" fill="#94a3b8">第 5 年</text>
+                            <text x="360" y="420" fontSize="10" fill="#94a3b8">第 10 年</text>
+                            <text x="720" y="420" fontSize="10" fill="#94a3b8">第 20 年</text>
+                            <text x="1000" y="420" fontSize="10" fill="#94a3b8" textAnchor="end">第 28 年</text>
+
+                            {/* 房貸遞減線 (Red) - 從 900 萬到 0 */}
+                            <path d="M 0,300 L 1000,400" fill="none" stroke="#f87171" strokeWidth="3" className="path-draw" />
+                            
+                            {/* 基金增長正常線 (Green) */}
+                            <path d="M 0,400 Q 180,330 360,60" fill="none" stroke="#22c55e" strokeWidth="3" className="path-draw" />
+                            
+                            {/* 基金增長壓力線 (Dashed Grey) */}
+                            <path d="M 0,400 Q 180,350 360,150" fill="none" stroke="#94a3b8" strokeWidth="2" strokeDasharray="5,5" className="path-draw" />
+
+                            {/* 關鍵點標註 */}
+                            <circle cx="0" cy="300" r="4" fill="#ef4444" /> {/* 房貸起點 900萬 */}
+                            <circle cx="360" cy="60" r="5" fill="#22c55e" /> {/* 第 10 年 2962萬 */}
+                            <circle cx="360" cy="150" r="4" fill="#64748b" /> {/* 第 10 年 壓力 2073萬 */}
+
+                            <text x="370" y="55" fontSize="12" fontWeight="bold" fill="#166534">第 10 年：2,962 萬 (正常)</text>
+                            <text x="370" y="145" fontSize="10" fill="#475569">第 10 年：2,073 萬 (-30%)</text>
+                            <text x="5" y="290" fontSize="10" fill="#b91c1c">房貸起點 900 萬</text>
+
+                            {/* 黃金交叉標註 */}
+                            <g>
+                                <circle cx="150" cy="315" r="8" fill="none" stroke="#fbbf24" strokeWidth="2" />
+                                <text x="100" y="345" fontSize="10" fontWeight="bold" fill="#b45309">黃金交叉點 (約第 4-5 年)</text>
+                            </g>
+                        </svg>
+                    </div>
+                    <p className="mt-4 text-center text-xs text-gray-400 italic">
+                        * 圖表根據房貸 28 年還款計畫與投資預期年化報酬率 20.47% (安聯) 與 10.46% (貝萊德) 模擬繪製。
+                    </p>
+                </div>,
+
+                // 9. 債務遞減與資產壓力測試
+                <div key="s8" className="flex flex-col h-full p-12 slide-enter overflow-y-auto custom-scroll">
+                    <h2 className="text-3xl font-bold mb-4 flex items-center gap-3"><span className="mono text-green-700">06</span> 數據對比與壓力測試</h2>
                     <div className="divider"></div>
                     <div className="grid grid-cols-3 gap-6 mt-4">
-                        <div className="col-span-1 space-y-2">
+                        <div className="col-span-1 space-y-4">
                             <div className="card-outline p-4 bg-gray-50">
-                                <h4 className="font-bold border-b mb-2 text-sm">房貸餘額 (年底) </h4>
-                                <ul className="mono text-[10px] leading-tight space-y-1">
+                                <h4 className="font-bold border-b mb-2">房貸餘額 (年底)</h4>
+                                <ul className="mono text-[11px] leading-tight space-y-1">
                                     <li>第 1 年: 8,773,463</li>
                                     <li>第 5 年: 7,809,778</li>
                                     <li>第 10 年: 6,464,619</li>
                                     <li>第 20 年: 3,226,172</li>
-                                    <li className="text-green-700 font-bold">第 28 年: 0</li>
+                                    <li className="text-green-700 font-bold">第 28 年: 0 (結清)</li>
                                 </ul>
                             </div>
                         </div>
-                        <div className="col-span-2 flex flex-col gap-4">
-                            <div className="h-48 bg-white card-outline p-2">
-                                <WealthChart />
+                        <div className="col-span-2 space-y-6">
+                            <div className="card-outline p-4 bg-indigo-50 border-indigo-300">
+                                <h4 className="font-bold text-indigo-800 mb-2">基金資產價值 (對比房貸餘額)</h4>
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div className="bg-white p-3 border">
+                                        <p className="mono text-xs text-gray-500">YEAR 5</p>
+                                        <p className="text-xl font-bold text-indigo-700">$6,722,508</p>
+                                        <p className="text-[10px] text-red-500">大跌-30%急用: $4,705,756</p>
+                                    </div>
+                                    <div className="bg-white p-3 border">
+                                        <p className="mono text-xs text-gray-500">YEAR 10</p>
+                                        <p className="text-xl font-bold text-indigo-700">$29,626,901</p>
+                                        <p className="text-[10px] text-red-500">大跌-30%急用: $20,738,831</p>
+                                    </div>
+                                </div>
                             </div>
-                            <div className="p-3 bg-green-50 border border-green-200">
-                                <p className="text-xs font-bold text-green-800">💡 結論：黃金交叉點</p>
-                                <p className="text-[10px] text-green-700">第10年即使大跌30%，資產($2073萬)仍為貸款($646萬)的3.2倍 。</p>
+                            <div className="p-4 bg-green-50 border border-green-200">
+                                <p className="text-sm font-bold text-green-800">💡 結論：絕對防禦力</p>
+                                <p className="text-xs text-green-700 leading-relaxed">即便在第 10 年面臨大跌 30% 的極端壓力，您的基金資產 ($2,073萬) 仍是剩餘房貸 ($646萬) 的 3 倍以上，達成絕對財務自由。</p>
                             </div>
                         </div>
                     </div>
                 </div>,
 
-                // 9. 行動指南
-                <div key="s8" className="flex flex-col h-full bg-black text-white p-12 slide-enter justify-center items-center text-center">
-                    <h2 className="text-4xl font-bold mb-12">立即啟動資產引擎</h2>
+                // 10. 行動指南
+                <div key="s9" className="flex flex-col h-full bg-black text-white p-12 slide-enter justify-center items-center text-center">
+                    <h2 className="text-4xl md:text-5xl font-bold mb-12">立即啟動資產引擎</h2>
                     <div className="grid grid-cols-3 gap-8 w-full max-w-4xl">
-                        <div className="p-6 border border-white/20"><p className="mono text-amber-500 text-xs mb-2">STEP 01</p><h3 className="font-bold text-lg">轉貸申請</h3></div>
-                        <div className="p-6 border border-white/20"><p className="mono text-amber-500 text-xs mb-2">STEP 02</p><h3 className="font-bold text-lg">保單活化</h3></div>
-                        <div className="p-6 border border-white/20"><p className="mono text-amber-500 text-xs mb-2">STEP 03</p><h3 className="font-bold text-lg">自動化 AIP</h3></div>
+                        <div className="p-6 border border-white/20"><p className="mono text-amber-500 text-xs mb-2">STEP 01</p><h3 className="font-bold text-lg">轉貸申請</h3><p className="text-xs text-gray-400">900萬 @ 2.45% / 28年</p></div>
+                        <div className="p-6 border border-white/20"><p className="mono text-amber-500 text-xs mb-2">STEP 02</p><h3 className="font-bold text-lg">保單活化</h3><p className="text-xs text-gray-400">450 萬保借套利</p></div>
+                        <div className="p-6 border border-white/20"><p className="mono text-amber-500 text-xs mb-2">STEP 03</p><h3 className="font-bold text-lg">自動化 AIP</h3><p className="text-xs text-gray-400">每月 4.6 萬科技基金計畫</p></div>
                     </div>
-                    <div className="mt-16"><p className="text-2xl font-bold text-white tracking-wider">李浚瑋 專屬財務顧問</p></div>
+                    <div className="mt-16"><p className="mono text-[10px] text-gray-500 mb-2 uppercase tracking-widest">Prepared for 賴育正 先生</p><p className="text-2xl font-bold text-white tracking-wider">李浚瑋 專屬財務顧問</p></div>
                 </div>
             ];
 
@@ -198,10 +308,28 @@
                 <div className="flex flex-col h-screen w-full items-center justify-center p-0 md:p-8">
                     <div className="slide-frame w-full h-full md:max-w-5xl md:max-h-[720px] relative overflow-hidden md:rounded-lg">
                         {slides[slide]}
+
+                        {/* 控制面板 */}
                         <div className="absolute bottom-0 left-0 right-0 p-4 md:p-8 flex justify-between items-center pointer-events-none">
-                            <button onClick={prev} className={`pointer-events-auto p-4 bg-white/80 backdrop-blur rounded-full shadow-md ${slide === 0 ? 'opacity-0' : 'opacity-100'}`} disabled={slide === 0}><Icon name="chevron-left" /></button>
-                            <div className="pointer-events-auto bg-black/5 backdrop-blur px-6 py-2 rounded-full mono text-xs font-bold">{slide + 1} / {total}</div>
-                            <button onClick={next} className={`pointer-events-auto p-4 bg-indigo-600 text-white rounded-full shadow-lg ${slide === total - 1 ? 'opacity-0' : 'opacity-100'}`} disabled={slide === total - 1}><Icon name="chevron-right" /></button>
+                            <button 
+                                onClick={prev}
+                                className={`pointer-events-auto p-4 bg-white/80 backdrop-blur rounded-full shadow-md ${slide === 0 ? 'opacity-0 cursor-default' : 'opacity-100'}`}
+                                disabled={slide === 0}
+                            >
+                                <Icon name="chevron-left" />
+                            </button>
+
+                            <div className="pointer-events-auto bg-black/5 backdrop-blur px-6 py-2 rounded-full mono text-xs font-bold border border-black/5 text-white">
+                                {slide + 1} / {total}
+                            </div>
+
+                            <button 
+                                onClick={next}
+                                className={`pointer-events-auto p-4 bg-indigo-600 text-white rounded-full shadow-lg hover:bg-indigo-500 transition-all ${slide === total - 1 ? 'opacity-0 cursor-default' : 'opacity-100'}`}
+                                disabled={slide === total - 1}
+                            >
+                                <Icon name="chevron-right" />
+                            </button>
                         </div>
                     </div>
                 </div>
